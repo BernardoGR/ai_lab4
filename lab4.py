@@ -1,11 +1,34 @@
 import fileinput
+import pprint as p
 import time
 
 debug = False
 
 
-def format_input(line):
-    return
+def format_input_nodes(line):
+    # remove white spaces
+    line = "".join(line.split())
+
+    b_network = {}
+    for node in line.split(","):
+        b_network[node] = []
+    return b_network
+
+
+def format_input_probability(b_network, line):
+    # remove white spaces
+    line = "".join(line.split())
+    # split on '=' and on '|' chars
+    line_eq_split = line.split("=")
+    line_pipe_split = line_eq_split[0].split("|")
+    node = line_pipe_split[0].replace("+", "").replace("-", "")
+    parents = []
+    if len(line_pipe_split) > 1:
+        parents = line_pipe_split[1].split(",")
+    probability = float(line_eq_split[1])
+
+    b_network[node].append({'parents': parents, 'probability': probability})
+    return b_network
 
 
 def do_query():
@@ -30,21 +53,19 @@ def main():
     for x in file_input:
         line.append(x)
 
-    print(line)
-    nodes = line[0]
+    b_network = format_input_nodes(line[0])
     num_probabilities = int(line[1])
     num_queries = int(line[2+num_probabilities])
-    print(nodes)
-    print(num_probabilities)
-    print(num_queries)
 
+    # loop probabilities input
     for i in range(2, (2+num_probabilities)):
-        # probability = format_input(file_input[i])
-        print(line[i])
+        b_network = format_input_probability(b_network, line[i])
 
+    p.pprint(b_network)
+
+    # loop queries input
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
-        # query = format_input(file_input[i])
-        print(line[i])
+        line[i]
 
 
 if __name__ == "__main__":

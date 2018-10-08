@@ -1,9 +1,19 @@
-Test, Ill
-3
-+Ill = 0.001
-+Test|+Ill=0.9
-+Test|-Ill=0.05
-3
-+Ill
--Ill|+Test
-+Test|+Ill
+Burglary,Earthquake,Alarm,JohnCalls,MaryCalls
+10
++Burglary=0.001
++Earthquake=0.002
++Alarm|+Earthquake,+Burglary=0.95
++Alarm|-Earthquake,+Burglary=0.94
++Alarm|+Earthquake,-Burglary=0.29
++Alarm|-Earthquake,-Burglary=0.001
++JohnCalls|+Alarm=0.9
++JohnCalls|-Alarm=0.05
++MaryCalls|+Alarm=0.7
++MaryCalls|-Alarm=0.01
+6
++Burglary|+Earthquake,+JohnCalls
++Earthquake
+-MaryCalls|+Earthquake,+Alarm
++JohnCalls|-Earthquake,-MaryCalls,+Burglary
+-Alarm|-Earthquake,-MaryCalls,+Burglary
+-Alarm,+JohnCalls|-Earthquake,-MaryCalls,+Burglary
