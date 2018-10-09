@@ -1,6 +1,7 @@
 import fileinput
 import pprint as p
 import time
+from pprint import pprint
 
 debug = False
 
@@ -31,9 +32,20 @@ def format_input_probability(b_network, line):
     return b_network
 
 
-def do_query():
-    return
+def do_query(test, line):
+    # remove white spaces
+    line = "".join(line.split())
+    #split on '|'
+    line_pipe_split = line.rstrip().split('|')
+    query = line_pipe_split[0::2]
+    evidence = line_pipe_split[1::2]
 
+    #Para separar evidence
+    for x in evidence:
+        aux = x.split(',')
+        test[query[0]] = aux
+
+    return
 
 def main():
     # example input
@@ -64,8 +76,12 @@ def main():
     p.pprint(b_network)
 
     # loop queries input
+    test = {}
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
-        line[i]
+        do_query(test, line[i]) 
+        
+
+    pprint(test)
 
 
 if __name__ == "__main__":
