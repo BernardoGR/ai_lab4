@@ -32,20 +32,19 @@ def format_input_probability(b_network, line):
     return b_network
 
 
-def do_query(test, line):
+def do_query(queries, line):
     # remove white spaces
     line = "".join(line.split())
-    #split on '|'
+    # split on '|'
     line_pipe_split = line.rstrip().split('|')
-    query = line_pipe_split[0::2]
-    evidence = line_pipe_split[1::2]
+    query = line_pipe_split[0].split(",")
+    evidence = []
+    if len(line_pipe_split) > 1:
+        evidence = line_pipe_split[1].split(',')
 
-    #Para separar evidence
-    for x in evidence:
-        aux = x.split(',')
-        test[query[0]] = aux
+    queries.append({'query': query, 'evidence': evidence})
 
-    return
+    return queries
 
 def main():
     # example input
@@ -76,12 +75,11 @@ def main():
     p.pprint(b_network)
 
     # loop queries input
-    test = {}
+    queries = []
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
-        do_query(test, line[i]) 
-        
+        queries = do_query(queries, line[i])
 
-    pprint(test)
+    pprint(queries)
 
 
 if __name__ == "__main__":
