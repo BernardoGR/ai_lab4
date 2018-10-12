@@ -9,7 +9,7 @@ debug = False
 def format_input_nodes(line):
     # remove white spaces
     line = "".join(line.split())
-
+    
     b_network = {}
     for node in line.split(","):
         b_network[node] = []
@@ -25,10 +25,10 @@ def format_input_probability(b_network, line):
     node = line_pipe_split[0].replace("+", "").replace("-", "")
     parents = []
     if len(line_pipe_split) > 1:
-        parents = line_pipe_split[1].split(",")
+        parents = line_pipe_split[1]
     probability = float(line_eq_split[1])
 
-    b_network[node].append({'parents': parents, 'probability': probability})
+    b_network[node].append({str(parents) : probability})
     return b_network
 
 
@@ -37,14 +37,26 @@ def do_query(queries, line):
     line = "".join(line.split())
     # split on '|'
     line_pipe_split = line.rstrip().split('|')
-    query = line_pipe_split[0].split(",")
+    query = line_pipe_split[0]
     evidence = []
     if len(line_pipe_split) > 1:
         evidence = line_pipe_split[1].split(',')
 
-    queries.append({'query': query, 'evidence': evidence})
+    queries.append({str(query) : evidence})
 
     return queries
+
+def conditional_prob(query, evidence):
+   
+    return cond_prob_res
+
+def chain_rule(query, evidence):
+
+    return chain_rule_res
+
+def total_probability (query, evidence):
+
+    return total_probability_res
 
 def main():
     # example input
