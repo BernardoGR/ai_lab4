@@ -12,7 +12,8 @@ def format_input_nodes(line):
     
     b_network = {}
     for node in line.split(","):
-        b_network[node] = []
+        b_network["+"+node] = []
+        b_network["-"+node] = []
     return b_network
 
 
@@ -22,15 +23,29 @@ def format_input_probability(b_network, line):
     # split on '=' and on '|' chars
     line_eq_split = line.split("=")
     line_pipe_split = line_eq_split[0].split("|")
-    node = line_pipe_split[0].replace("+", "").replace("-", "")
+    node = line_pipe_split[0]
+    # create inverse probability node
+    inverse_node = ""
+    if "+" in node:
+        inverse_node = node.replace("+", "-")
+    if "-" in node:
+        inverse_node = node.replace("-", "+")
+    # get parents probabilities
     parents = []
     if len(line_pipe_split) > 1:
         parents = line_pipe_split[1]
     probability = float(line_eq_split[1])
-
-    b_network[node].append({str(parents) : probability})
+    inverse_probability = 1 - probability
+    # append new nodes
+    print(node, str(parents), str(probability))
+    b_network[node].append({str(parents): probability})
+    if inverse_node != "":
+        b_network[inverse_node].append({str(parents): inverse_probability})
     return b_network
 
+
+def search_probability_by_parents(node, parent_values):
+    #list(filter(lambda k: node in k, lst))
 
 def do_query(queries, line):
     # remove white spaces
