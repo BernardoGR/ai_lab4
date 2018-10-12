@@ -10,7 +10,7 @@ def format_input_nodes(line):
     # remove white spaces
     line = "".join(line.split())
     
-    b_network = {}
+    b_network = {'vars': line.split(",")}
     for node in line.split(","):
         b_network["+"+node] = []
         b_network["-"+node] = []
@@ -44,8 +44,11 @@ def format_input_probability(b_network, line):
     return b_network
 
 
-def search_probability_by_parents(node, parent_values):
-    #list(filter(lambda k: node in k, lst))
+def search_probability_by_parents(node, parent_values=None):
+    if parent_values:
+        for parent in parent_values:
+            node = list(filter(lambda x: parent in list(x.keys())[0], node))
+    print(node)
 
 def do_query(queries, line):
     # remove white spaces
@@ -61,31 +64,47 @@ def do_query(queries, line):
 
     return queries
 
+'''
 def conditional_prob(query, evidence):
    
     return cond_prob_res
+
 
 def chain_rule(query, evidence):
 
     return chain_rule_res
 
+
 def total_probability (query, evidence):
 
     return total_probability_res
+'''
+
+
+def enumeration_ask(query, evidence, b_network):
+    cpt = []
+    list_query = list(query.keys())[0].split(',')
+    for q in list_query:
+        enumerate_all(b_network['vars'], q, b_network, evidence)
+
+
+def enumerate_all(b_network_vars, q, evidence, b_network):
+    if len(b_network_vars):
+        return 1
+    y = b_network_vars[0]
+    if y in evidence:
+        # sacar parents de y
+        y_parents = list(b_network["+"+y].keys())[0].replace("+", "").replace("-", "").split(',')
+        # lista de parents no contenidos en la evidencia
+        parents_not_evidence = list(filter(lambda parent: parent not in str(evidence), y_parents))
+        return enumerate_all(parents_not_evidence,  q, evidence, b_network) * enumerate_all(b_network_vars[1:],  q, evidence, b_network)
+    else:
+        
+        return
+
 
 def main():
     # example input
-    '''
-    Test, Ill
-    3
-    +Ill = 0.001
-    +Test|+Ill=0.9
-    +Test|-Ill=0.05
-    3
-    +Ill
-    -Ill|+Test
-    +Test|+Ill
-    '''
     file_input = fileinput.input()
     line = []
     for x in file_input:
@@ -107,6 +126,9 @@ def main():
         queries = do_query(queries, line[i])
 
     pprint(queries)
+
+    # print("Test...")
+    # search_probability_by_parents(b_network['+Alarm'], ['+Earthquake','+Burglary'])
 
 
 if __name__ == "__main__":
