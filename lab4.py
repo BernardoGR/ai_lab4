@@ -2,8 +2,10 @@ import fileinput
 import pprint as p
 import time
 from pprint import pprint
+from toposort import toposort, toposort_flatten
 
 debug = False
+bn_graph = {}
 
 
 def format_input_nodes(line):
@@ -14,6 +16,7 @@ def format_input_nodes(line):
     for node in line.split(","):
         b_network["+"+node] = []
         b_network["-"+node] = []
+        # bn_graph[node] = {}
     return b_network
 
 
@@ -34,10 +37,13 @@ def format_input_probability(b_network, line):
     parents = []
     if len(line_pipe_split) > 1:
         parents = line_pipe_split[1]
+        # append parents to bn_graph
+        bn_graph[node] = set(str(parents).split(","))
+    else:
+        bn_graph[node] = set()
     probability = float(line_eq_split[1])
     inverse_probability = 1 - probability
     # append new nodes
-    print(node, str(parents), str(probability))
     b_network[node].append({str(parents): probability})
     if inverse_node != "":
         b_network[inverse_node].append({str(parents): inverse_probability})
@@ -49,6 +55,7 @@ def search_probability_by_parents(node, parent_values=None):
         for parent in parent_values:
             node = list(filter(lambda x: parent in list(x.keys())[0], node))
     print(node)
+
 
 def do_query(queries, line):
     # remove white spaces
@@ -99,7 +106,7 @@ def enumerate_all(b_network_vars, q, evidence, b_network):
         parents_not_evidence = list(filter(lambda parent: parent not in str(evidence), y_parents))
         return enumerate_all(parents_not_evidence,  q, evidence, b_network) * enumerate_all(b_network_vars[1:],  q, evidence, b_network)
     else:
-        
+
         return
 
 
@@ -118,14 +125,28 @@ def main():
     for i in range(2, (2+num_probabilities)):
         b_network = format_input_probability(b_network, line[i])
 
+    bn_sorted_nodes = toposort_flatten(bn_graph)
+
+    print("\nb_network")
     p.pprint(b_network)
+    print("\n")
 
     # loop queries input
     queries = []
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
         queries = do_query(queries, line[i])
 
+    print("queries")
     pprint(queries)
+    print("\n")
+
+    print("bn_graph")
+    p.pprint(bn_graph)
+    print("\n")
+
+    print("toposort_bn_grapf")
+    p.pprint(bn_sorted_nodes)
+    print("\n")
 
     # print("Test...")
     # search_probability_by_parents(b_network['+Alarm'], ['+Earthquake','+Burglary'])

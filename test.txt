@@ -17,3 +17,17 @@ Burglary,Earthquake,Alarm,JohnCalls,MaryCalls
 +JohnCalls|-Earthquake,-MaryCalls,+Burglary
 -Alarm|-Earthquake,-MaryCalls,+Burglary
 -Alarm,+JohnCalls|-Earthquake,-MaryCalls,+Burglary
+
+
+[
+  {
+    'node': 'Alarm'
+    'probabilities':
+       [{'+Earthquake,+Burglary': 0.95},
+        {'-Earthquake,+Burglary': 0.94},
+        {'+Earthquake,-Burglary': 0.29},
+        {'-Earthquake,-Burglary': 0.001}],
+    'parents':
+        ['Earthquake', 'Burglary']
+  },
+]
