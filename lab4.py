@@ -2,6 +2,7 @@ import fileinput
 import pprint as p
 import time
 from pprint import pprint
+import itertools
 from toposort import toposort, toposort_flatten
 
 debug = False
@@ -38,9 +39,9 @@ def format_input_probability(b_network, line):
     if len(line_pipe_split) > 1:
         parents = line_pipe_split[1]
         # append parents to bn_graph
-        bn_graph[node] = set(str(parents).split(","))
+        bn_graph[node[1:]] = set(str(parents).replace("+", "").replace("-", "").split(","))
     else:
-        bn_graph[node] = set()
+        bn_graph[node[1:]] = set()
     probability = float(line_eq_split[1])
     inverse_probability = 1 - probability
     # append new nodes
@@ -50,6 +51,21 @@ def format_input_probability(b_network, line):
     return b_network
 
 
+def format_input_queries(queries, line):
+    # remove white spaces
+    line = "".join(line.split())
+    # split on '|'
+    line_pipe_split = line.rstrip().split('|')
+    query = line_pipe_split[0].split(",")
+    evidence = []
+    if len(line_pipe_split) > 1:
+        evidence = line_pipe_split[1].split(',')
+
+    queries.append({'query': query, 'evidence': evidence})
+
+    return queries
+
+
 def search_probability_by_parents(node, parent_values=None):
     if parent_values:
         for parent in parent_values:
@@ -57,57 +73,60 @@ def search_probability_by_parents(node, parent_values=None):
     print(node)
 
 
-def do_query(queries, line):
-    # remove white spaces
-    line = "".join(line.split())
-    # split on '|'
-    line_pipe_split = line.rstrip().split('|')
-    query = line_pipe_split[0]
-    evidence = []
-    if len(line_pipe_split) > 1:
-        evidence = line_pipe_split[1].split(',')
-
-    queries.append({str(query) : evidence})
-
-    return queries
-
-'''
-def conditional_prob(query, evidence):
-   
-    return cond_prob_res
-
-
-def chain_rule(query, evidence):
-
-    return chain_rule_res
-
-
-def total_probability (query, evidence):
-
-    return total_probability_res
-'''
+# recieves a list of nodes and return the nodes boolean enumeration:
+# in: [A, B]
+# out: [[+A, +B], [+A, -B], [-A, +B], [-A, -B]]
+def enumerate_nodes(nodes):
+    # generate a list of boolean combinations
+    combinations = list(map(list, itertools.product([0, 1], repeat=len(nodes))))
+    result_combinations = []
+    for combination in combinations:
+        new_combination = []
+        for index, value in enumerate(combination):
+            if value:
+                sign = '+'
+            else:
+                sign = '-'
+            # start from node index 1 to remove original sign
+            new_combination.append(sign + nodes[index][1:])
+        result_combinations.append(new_combination)
+    return result_combinations
 
 
 def enumeration_ask(query, evidence, b_network):
-    cpt = []
-    list_query = list(query.keys())[0].split(',')
-    for q in list_query:
-        enumerate_all(b_network['vars'], q, b_network, evidence)
+    enumerated_list_query_nodes = enumerate_nodes(query)
+    Q = []
+    print('\n\n combinations of query nodes: ' + str(query))
+    print(enumerated_list_query_nodes)
+    print('\n for each combination: query + evidence: ')
+    for q in enumerated_list_query_nodes:
+        evidence_x = q + evidence  # evidence plus the query with values assigned
+        print(evidence_x)
+        #result = enumerate_all(toposort_flatten(bn_graph), evidence_x, b_network)
+        #Q.append(result)
+    # after for loop, normalize Q values.
 
 
-def enumerate_all(b_network_vars, q, evidence, b_network):
-    if len(b_network_vars):
+def enumerate_all(b_network_vars, evidence, b_network):
+    if len(b_network_vars) == 0:
         return 1
+    # get first of b_network_bars
     y = b_network_vars[0]
-    if y in evidence:
-        # sacar parents de y
-        y_parents = list(b_network["+"+y].keys())[0].replace("+", "").replace("-", "").split(',')
-        # lista de parents no contenidos en la evidencia
-        parents_not_evidence = list(filter(lambda parent: parent not in str(evidence), y_parents))
-        return enumerate_all(parents_not_evidence,  q, evidence, b_network) * enumerate_all(b_network_vars[1:],  q, evidence, b_network)
+    # see if the node (y) is contained in the evidence
+    if y in str(evidence):
+        # get probability of y, given the values assigned to its parents in the evidence
+        p_y = get_probability('+'+y, evidence)
+        return p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
     else:
-
-        return
+        # remove y multiplying its positive and negative probability:
+        # P(y) * enumerate_all(b_network_vars[1:], (evidence + y), b_network)
+        # +
+        # P(-y) * enumerate_all(b_network_vars[1:], (evidence + -y), b_network)
+        p_y = get_probability('+'+y, evidence)
+        p_not_y = get_probability('-'+y, evidence)
+        positive_result = p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
+        negative_result = p_not_y * enumerate_all(b_network_vars[1:], (evidence.append('-'+y)), b_network)
+        return positive_result + negative_result
 
 
 def main():
@@ -134,7 +153,7 @@ def main():
     # loop queries input
     queries = []
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
-        queries = do_query(queries, line[i])
+        queries = format_input_queries(queries, line[i])
 
     print("queries")
     pprint(queries)
@@ -149,7 +168,8 @@ def main():
     print("\n")
 
     # print("Test...")
-    # search_probability_by_parents(b_network['+Alarm'], ['+Earthquake','+Burglary'])
+    for test in queries:
+        enumeration_ask(test['query'], test['evidence'], b_network)
 
 
 if __name__ == "__main__":
