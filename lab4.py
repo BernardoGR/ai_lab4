@@ -71,6 +71,7 @@ def search_probability_by_parents(node, parent_values=None):
         for parent in parent_values:
             node = list(filter(lambda x: parent in list(x.keys())[0], node))
     print(node)
+    return node
 
 
 # recieves a list of nodes and return the nodes boolean enumeration:
@@ -91,6 +92,21 @@ def enumerate_nodes(nodes):
             new_combination.append(sign + nodes[index][1:])
         result_combinations.append(new_combination)
     return result_combinations
+
+# def get_parents_from_evidence()
+
+
+def get_probability(node, evidence, b_network):
+    # parents_evidence: array in the form: ['+Burglary', '+Earthquake']
+    parents_evidence = get_parents_from_evidence(evidence)
+    result_probability = search_probability_by_parents(b_network['node'], parents_evidence)
+    if len(result_probability) > 1:
+        # one parent value was unknown
+        print("error: unknown parent")
+        return
+    else:
+        # return probability value queried:
+        return
 
 
 def enumeration_ask(query, evidence, b_network):
@@ -115,15 +131,15 @@ def enumerate_all(b_network_vars, evidence, b_network):
     # see if the node (y) is contained in the evidence
     if y in str(evidence):
         # get probability of y, given the values assigned to its parents in the evidence
-        p_y = get_probability('+'+y, evidence)
+        p_y = get_probability('+'+y, evidence, b_network)
         return p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
     else:
         # remove y multiplying its positive and negative probability:
         # P(y) * enumerate_all(b_network_vars[1:], (evidence + y), b_network)
         # +
         # P(-y) * enumerate_all(b_network_vars[1:], (evidence + -y), b_network)
-        p_y = get_probability('+'+y, evidence)
-        p_not_y = get_probability('-'+y, evidence)
+        p_y = get_probability('+'+y, evidence, b_network)
+        p_not_y = get_probability('-'+y, evidence, b_network)
         positive_result = p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
         negative_result = p_not_y * enumerate_all(b_network_vars[1:], (evidence.append('-'+y)), b_network)
         return positive_result + negative_result
@@ -168,8 +184,10 @@ def main():
     print("\n")
 
     # print("Test...")
-    for test in queries:
-        enumeration_ask(test['query'], test['evidence'], b_network)
+    #for test in queries:
+        # enumeration_ask(test['query'], test['evidence'], b_network)
+
+    search_probability_by_parents(b_network['+Alarm'], ['+Burglary'])
 
 
 if __name__ == "__main__":
