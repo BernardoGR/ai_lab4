@@ -4,6 +4,7 @@ import time
 from pprint import pprint
 import itertools
 from toposort import toposort, toposort_flatten
+import copy
 
 debug = False
 bn_graph = {}
@@ -70,7 +71,7 @@ def search_probability_by_parents(node, parent_values=None):
     if parent_values:
         for parent in parent_values:
             node = list(filter(lambda x: parent in list(x.keys())[0], node))
-    print(node)
+    # print(node)
     return node
 
 
@@ -93,55 +94,83 @@ def enumerate_nodes(nodes):
         result_combinations.append(new_combination)
     return result_combinations
 
-# def get_parents_from_evidence()
+
+def get_parents_from_evidence(node, evidence, b_network):
+    parents_evidence = []
+    # print("---> evidence:")
+    # print(evidence)
+    # print("---")
+    if evidence is not None:
+        for e in evidence:
+            for parent in b_network[node]:
+                if len(parent) > 0:
+                    if e in list(parent.keys())[0]:
+                        parents_evidence.append(e)
+    return parents_evidence
 
 
+# in: node: "+Alarm", evidence: ['+Burglary', '+Earthquake', ...], b_network
+# out: provability value (lookup)
 def get_probability(node, evidence, b_network):
     # parents_evidence: array in the form: ['+Burglary', '+Earthquake']
-    parents_evidence = get_parents_from_evidence(evidence)
-    result_probability = search_probability_by_parents(b_network['node'], parents_evidence)
+    parents_evidence = get_parents_from_evidence(node, evidence, b_network)
+    result_probability = search_probability_by_parents(b_network[node], parents_evidence)
     if len(result_probability) > 1:
         # one parent value was unknown
         print("error: unknown parent")
-        return
+        return 0
     else:
         # return probability value queried:
-        return
+        # print(result_probability)
+        return result_probability[0][list(result_probability[0].keys())[0]]
 
 
 def enumeration_ask(query, evidence, b_network):
     enumerated_list_query_nodes = enumerate_nodes(query)
     Q = []
-    print('\n\n combinations of query nodes: ' + str(query))
-    print(enumerated_list_query_nodes)
-    print('\n for each combination: query + evidence: ')
     for q in enumerated_list_query_nodes:
         evidence_x = q + evidence  # evidence plus the query with values assigned
-        print(evidence_x)
-        #result = enumerate_all(toposort_flatten(bn_graph), evidence_x, b_network)
-        #Q.append(result)
-    # after for loop, normalize Q values.
+        # print(evidence_x)
+        result = enumerate_all(toposort_flatten(bn_graph), evidence_x, b_network)
+        Q.append(result)
+    print("result"+str(Q))
+    # normalize Q values.
+
+    # get the corresponding Q value for the query.
+    # return that Q value
 
 
 def enumerate_all(b_network_vars, evidence, b_network):
+    # print("\nenum all evidence")
+    # print(evidence)
     if len(b_network_vars) == 0:
         return 1
     # get first of b_network_bars
     y = b_network_vars[0]
     # see if the node (y) is contained in the evidence
-    if y in str(evidence):
+    y_val = None
+    for e in evidence:
+        if y in e:
+            y_val = e
+    if y_val is not None:
+        # print('if')
         # get probability of y, given the values assigned to its parents in the evidence
-        p_y = get_probability('+'+y, evidence, b_network)
-        return p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
+        p_y = get_probability(y_val, evidence, b_network)
+        return p_y * enumerate_all(b_network_vars[1:], evidence, b_network)
     else:
+        # print('else')
         # remove y multiplying its positive and negative probability:
         # P(y) * enumerate_all(b_network_vars[1:], (evidence + y), b_network)
         # +
         # P(-y) * enumerate_all(b_network_vars[1:], (evidence + -y), b_network)
         p_y = get_probability('+'+y, evidence, b_network)
         p_not_y = get_probability('-'+y, evidence, b_network)
-        positive_result = p_y * enumerate_all(b_network_vars[1:], (evidence.append('+'+y)), b_network)
-        negative_result = p_not_y * enumerate_all(b_network_vars[1:], (evidence.append('-'+y)), b_network)
+        new_evidence = copy.deepcopy(evidence)
+        new_evidence.append('+'+y)
+        positive_result = p_y * enumerate_all(b_network_vars[1:], new_evidence, b_network)
+        new_evidence2 = copy.deepcopy(evidence)
+        new_evidence2.append('-' + y)
+        negative_result = p_not_y * enumerate_all(b_network_vars[1:], new_evidence2, b_network)
         return positive_result + negative_result
 
 
@@ -183,11 +212,14 @@ def main():
     p.pprint(bn_sorted_nodes)
     print("\n")
 
-    # print("Test...")
-    #for test in queries:
-        # enumeration_ask(test['query'], test['evidence'], b_network)
-
     search_probability_by_parents(b_network['+Alarm'], ['+Burglary'])
+
+    print("Test...")
+    for test in queries:
+        print("\ntest: ")
+        print(test)
+        enumeration_ask(test['query'], test['evidence'], b_network)
+
 
 
 if __name__ == "__main__":
