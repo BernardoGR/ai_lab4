@@ -5,9 +5,7 @@ from pprint import pprint
 import itertools
 from toposort import toposort, toposort_flatten
 import copy
-import numpy as np
-from sklearn import preprocessing
-from sklearn.preprocessing import normalize
+
 
 
 
@@ -201,16 +199,17 @@ def main():
         b_network = format_input_probability(b_network, line[i])
 
     bn_sorted_nodes = toposort_flatten(bn_graph)
-
+    """
     print("\nb_network")
     p.pprint(b_network)
     print("\n")
+    """
 
     # loop queries input
     queries = []
     for i in range(3+num_probabilities, (3+num_probabilities+num_queries)):
         queries = format_input_queries(queries, line[i])
-
+    """
     print("queries")
     pprint(queries)
     print("\n")
@@ -222,13 +221,13 @@ def main():
     print("toposort_bn_grapf")
     p.pprint(bn_sorted_nodes)
     print("\n")
-
+    """
     search_probability_by_parents(b_network['+Alarm'], ['+Burglary'])
 
-    print("Test...")
+    #print("Test...")
     for test in queries:
-        print("\ntest: ")
-        print(test)
+        #print("\ntest: ")
+        #print(test)
         enumeration_ask(test['query'], test['evidence'], b_network)
 
 
