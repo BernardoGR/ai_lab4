@@ -5,6 +5,11 @@ from pprint import pprint
 import itertools
 from toposort import toposort, toposort_flatten
 import copy
+import numpy as np
+from sklearn import preprocessing
+from sklearn.preprocessing import normalize
+
+
 
 debug = False
 bn_graph = {}
@@ -127,17 +132,23 @@ def get_probability(node, evidence, b_network):
 
 def enumeration_ask(query, evidence, b_network):
     enumerated_list_query_nodes = enumerate_nodes(query)
+    #print("Query: ", query)
     Q = []
-    for q in enumerated_list_query_nodes:
+    index = 0
+    for index, q in enumerate(enumerated_list_query_nodes):
         evidence_x = q + evidence  # evidence plus the query with values assigned
-        # print(evidence_x)
+        #print(q)
+        #if np.array_equal(q, query):
+         #   print('index', index)
         result = enumerate_all(toposort_flatten(bn_graph), evidence_x, b_network)
         Q.append(result)
-    print("result"+str(Q))
+    #print("Result without beeing normalized "+str(Q))
     # normalize Q values.
-
+    norm = [float(i)/sum(Q) for i in Q]
     # get the corresponding Q value for the query.
+    # esta en el for de arriba el del index 
     # return that Q value
+    print("Correct_Result:",norm[index])
 
 
 def enumerate_all(b_network_vars, evidence, b_network):
