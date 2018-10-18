@@ -222,7 +222,7 @@ def main():
     p.pprint(bn_sorted_nodes)
     print("\n")
     """
-    search_probability_by_parents(b_network['+Alarm'], ['+Burglary'])
+    #search_probability_by_parents(b_network['+Alarm'], ['+Burglary'])
 
     #print("Test...")
     for test in queries:
