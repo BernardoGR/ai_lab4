@@ -145,7 +145,7 @@ def enumeration_ask(query, evidence, b_network):
     # get the corresponding Q value for the query.
     # esta en el for de arriba el del index 
     # return that Q value
-    print(norm[index])
+    print(round(norm[index],7))
 
 
 def enumerate_all(b_network_vars, evidence, b_network):
