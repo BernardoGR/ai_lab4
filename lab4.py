@@ -3,11 +3,8 @@ import pprint as p
 import time
 from pprint import pprint
 import itertools
-from toposort import toposort, toposort_flatten
+from toposort import toposort_flatten
 import copy
-
-
-
 
 debug = False
 bn_graph = {}
