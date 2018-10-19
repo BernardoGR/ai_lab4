@@ -15,4 +15,4 @@ StudyAllNight, NightOutDrinking, HeadAche, PassExam
 +NightOutDrinking
 +PassExam
 +NightOutDrinking|+PassExam
-+StudyAllNight,+NightOutDrinking|+PassExam
++StudyAllNight,+NightOutDrinking
