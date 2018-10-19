@@ -130,7 +130,9 @@ def enumeration_ask(query, evidence, b_network):
     #print("Query: ", query)
     Q = []
     index = 0
-    for index, q in enumerate(enumerated_list_query_nodes):
+    for i, q in enumerate(enumerated_list_query_nodes):
+        if query == q:
+            index = i
         evidence_x = q + evidence  # evidence plus the query with values assigned
         #print(q)
         #if np.array_equal(q, query):
